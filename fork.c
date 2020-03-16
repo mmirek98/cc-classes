@@ -15,9 +15,10 @@ int main() {
 
     if (pid == 0) { 			
       zmienna_globalna++;
-      /* wynik=execv("./program",NULL); */
-      /* if(wynik==-1) */
-      /*     printf("Proces potomny nie wykonal programu\n"); */
+      wynik = execv("./program.o", NULL);
+
+      if (wynik==-1)
+        printf("Proces potomny nie wykonal programu\n");
 
       exit(0);
     } else {					
