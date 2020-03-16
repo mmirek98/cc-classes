@@ -36,7 +36,7 @@ int main() {
   for (i = 0; i < 1000; i++) {
 
     pid = clone(&funkcja_watku, (void *)stos+ROZMIAR_STOSU, 
-		 CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_VM, 0);
+		 CLONE_FS | CLONE_FILES, 0);
 
     waitpid(pid, NULL, __WCLONE);
   }
