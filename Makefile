@@ -10,27 +10,28 @@ OPT = -g -DDEBUG
 # wersja zoptymalizowana do mierzenia czasu
 # OPT = -O3
 
-# pliki naglowkowe
-INC = -I../pomiar_czasu
+# domyślna kompilacja
+all: program.o fork.o clone.o
+	@echo ./fork.o to run example with fork, 
+	@echo ./clone.o to run example with clone 
 
-# biblioteki
-LIB = -L../pomiar_czasu -lpomiar_czasu -lm
+fork: fork.o
+	$(LOADER) $(OPT) fork.o -o fork
 
-# zaleznosci i komendy
-fork: fork.o 
-	$(LOADER) $(OPT) fork.o -o fork $(LIB)
-
-# jak uzyskac plik fork.o ?
-fork.o: fork.c ../pomiar_czasu/pomiar_czasu.h
-	$(CCOMP) -c $(OPT) fork.c $(INC) 
-
-# zaleznosci i komendy
 clone: clone.o 
-	$(LOADER) $(OPT) clone.o -o clone $(LIB)
+	$(LOADER) $(OPT) clone.o -o clone
 
 # jak uzyskac plik clone.o ?
-clone.o: clone.c ../pomiar_czasu/pomiar_czasu.h
-	$(CCOMP) -c $(OPT) clone.c $(INC) 
+clone.o: clone.c pomiar_czasu.h program.o
+	$(CCOMP) -Wall clone.c pomiar_czasu.c -o clone.o 
+
+# jak uzyskac plik fork.o ?
+fork.o: fork.c pomiar_czasu.h program.o
+	$(CCOMP) -Wall fork.c pomiar_czasu.c -o fork.o
+
+# jak uzyskac plik program.o ?
+program.o: program.c
+	$(CCOMP) program.c -o program.o
 
 clean:
 	rm -f *.o
