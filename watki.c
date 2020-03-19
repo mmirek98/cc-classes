@@ -52,36 +52,45 @@ void * zadanie_watku (void * arg_wsk) {
 	return(NULL);
 }
 
-void zmierz_czas(void* nr_watku) {
-  clock_t start = clock();
-  czasozajmowacz();
-  printf("Czas wykonywania: %lu ms dla watku %d \n", clock() - start, (int) nr_watku);
+void wypisz_atrybuty(void* nr_watku) {
+  int nr = (int) nr_watku;
+  pthread_attr_t attr;
+  pthread_t thread;
+  size_t size;
+
+  thread = pthread_self();
+
+  pthread_getattr_np(thread, &attr);
+  pthread_attr_getstacksize(&attr, &size);
+  sleep(1);
+  printf("Rozmiar stosu %d dla watku %d \n", size, nr);
 }
 
 int main() {
-  pthread_t tid[5];
-  pthread_attr_t attr[5];
+  pthread_t tid[10];
+  pthread_attr_t attr[10];
 
   // ==== pthread_attr_setstacksize 
   int i, j;
-  size_t stack_size[5];
-  size_t size[5];
+  size_t stack_size[10];
+  size_t size[10];
   stack_size[0] = PTHREAD_STACK_MIN;
   stack_size[1] = PTHREAD_STACK_MIN * 10;
-  stack_size[2] = PTHREAD_STACK_MIN * 1000;
-  stack_size[3] = PTHREAD_STACK_MIN * 100000;
-  stack_size[4] = PTHREAD_STACK_MIN * PTHREAD_STACK_MIN;
+  stack_size[2] = PTHREAD_STACK_MIN * 100;
+  stack_size[3] = PTHREAD_STACK_MIN * 1000;
+  stack_size[4] = PTHREAD_STACK_MIN * 10000;
+  stack_size[5] = PTHREAD_STACK_MIN * 50000;
+  stack_size[6] = PTHREAD_STACK_MIN * 100000;
+  stack_size[7] = PTHREAD_STACK_MIN * 500000;
+  stack_size[8] = PTHREAD_STACK_MIN * 1000000;
+  stack_size[9] = PTHREAD_STACK_MIN * PTHREAD_STACK_MIN;
 
-  for (i = 0; i < 5; i++) {
+  for (i = 0; i < 10; i++) {
     pthread_attr_init(&attr[i]);
     pthread_attr_setstacksize(&attr[i], stack_size[i]);
-    pthread_attr_getstacksize(&attr[i], &size[i]);
-    printf("Rozmiar stosu %d dla watku %d \n", size[i], i);
-
-    pthread_create(&tid[i], &attr[i], (void*) zmierz_czas, (void*) i);
-    // pthread_join(tid[i], NULL);
+    pthread_create(&tid[i], &attr[i], (void*) wypisz_atrybuty, (void*) i);
   }
 
-  for (j = 0; j < 5; j++) 
+  for (j = 0; j < 10; j++) 
     pthread_join(tid[j], NULL);
 }
