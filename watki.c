@@ -1,6 +1,12 @@
-#include<stdlib.h>
-#include<stdio.h>
-#include<pthread.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <limits.h>
+#include <linux/sched.h>
+#define _GNU_SOURCE
+    #include <stdio.h>
+       #include <stdlib.h>
+       #include <errno.h>
 
 int zmienna_wspolna = 0;
 
@@ -46,73 +52,36 @@ void * zadanie_watku (void * arg_wsk) {
 	return(NULL);
 }
 
+void zmierz_czas(void* nr_watku) {
+  clock_t start = clock();
+  czasozajmowacz();
+  printf("Czas wykonywania: %lu ms dla watku %d \n", clock() - start, (int) nr_watku);
+}
+
 int main() {
-	pthread_t tid;
-	pthread_attr_t attr;
-	void *wynik;
-	int i;
+  pthread_t tid[5];
+  pthread_attr_t attr[5];
 
-	//Wątek przyłączalny
-	printf("watek glowny: tworzenie watku potomnego nr 1\n");
+  // ==== pthread_attr_setstacksize 
+  int i, j;
+  size_t stack_size[5];
+  size_t size[5];
+  stack_size[0] = PTHREAD_STACK_MIN;
+  stack_size[1] = PTHREAD_STACK_MIN * 10;
+  stack_size[2] = PTHREAD_STACK_MIN * 1000;
+  stack_size[3] = PTHREAD_STACK_MIN * 100000;
+  stack_size[4] = PTHREAD_STACK_MIN * PTHREAD_STACK_MIN;
 
-	/*Tu wstaw kod tworzenia wątku z domyślnymi wartościami*/
-  pthread_create(&tid, NULL, zadanie_watku, NULL);
+  for (i = 0; i < 5; i++) {
+    pthread_attr_init(&attr[i]);
+    pthread_attr_setstacksize(&attr[i], stack_size[i]);
+    pthread_attr_getstacksize(&attr[i], &size[i]);
+    printf("Rozmiar stosu %d dla watku %d \n", size[i], i);
 
-	sleep(2); // czas na uruchomienie watku
-
-	printf("\twatek glowny: wyslanie sygnalu zabicia watku\n");
-	pthread_cancel(tid);
-
-	//Co nalezy zrobić przed sprawdzeniem czy wątki się skończyły?
-  pthread_join(tid, &wynik);
-	if (wynik == PTHREAD_CANCELED)
-		printf("\twatek glowny: watek potomny zostal zabity\n");
-	else
-		printf("\twatek glowny: watek potomny NIE zostal zabity - blad\n");
-
-	//odłączenie wątku
-  pthread_detach(tid);
-
-	zmienna_wspolna = 0;
-
-	printf("watek glowny: tworzenie watku potomnego nr 2\n");
-
-	/*Tu wstaw kod tworzenia wątku z domyślnymi wartościami*/
-  pthread_create(&tid, NULL, zadanie_watku, NULL);
-	sleep(2); // czas na uruchomienie watku
-
-	printf("\twatek glowny: odlaczenie watku potomnego\n");
-	//Instrukcja odłączenia?
-  pthread_detach(tid);
-
-
-	printf("\twatek glowny: wyslanie sygnalu zabicia watku odlaczonego\n");
-	pthread_cancel(tid);
-
-	//Czy watek zostął zabity? Jak to sprawdzić?
-  pthread_join(tid, &wynik);
-  if (wynik == PTHREAD_CANCELED) {
-    printf("Wątek został zabity");
-  } else {
-    printf("Wątek NIE został zabity!");
+    pthread_create(&tid[i], &attr[i], (void*) zmierz_czas, (void*) i);
+    // pthread_join(tid[i], NULL);
   }
-	
-	//Wątek odłączony
-	pthread_detach(tid);
 
-	//Inicjacja atrybutów?
-  pthread_attr_init(&attr);
-	//Ustawianie typu watku na odłączony
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-	printf("watek glowny: tworzenie odlaczonego watku potomnego nr 3\n");
-	pthread_create(&tid, &attr, zadanie_watku, NULL);
-
-	//Niszczenie atrybutów
-  pthread_attr_destroy(&attr);
-
-	printf("\twatek glowny: koniec pracy, watek odlaczony pracuje dalej\n");
-	pthread_exit(NULL); // co stanie sie gdy uzyjemy exit(0)?
-
-   // Przy exit(0) wątek główny nie czeka na wykonanie się wątków potomnych
+  for (j = 0; j < 5; j++) 
+    pthread_join(tid[j], NULL);
 }
