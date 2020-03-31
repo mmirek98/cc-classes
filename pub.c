@@ -27,21 +27,21 @@ void* drinkBeers() {
       pthread_mutex_unlock(&beerShield);
     }
 
-    switch (drunkBeers) {
-      case 0:
-        printf("Klient nr. %d PIJE swoje PIERWSZE piwerko!\n", clientNumber);
-        break;
-      case 1:
-        printf("Klient nr. %d PIJE swoje DRUGIE piwo i jest porządnie wstawiony!\n", clientNumber);
-        printf("Chwiejnym krokiem pub opuszcza klient nr. %d!\n", clientNumber);
-        break;
-    }
-
-    usleep((rand()%consumingTime) * 1000000);
+    int drinkFor = (int)(rand()%consumingTime);
+    sleep(drinkFor);
     pthread_mutex_lock(&beerShield);
     mugs++;
     haveMug = false;
     pthread_mutex_unlock(&beerShield);
+    switch (drunkBeers) {
+      case 0:
+        printf("Klient nr. %d PIJE swoje PIERWSZE piwerko w czasie %d sekund!\n", clientNumber, drinkFor);
+        break;
+      case 1:
+        printf("Klient nr. %d PIJE swoje DRUGIE piwo w czasie %d sekund!\n", clientNumber, drinkFor);
+        printf("Chwiejnym krokiem pub opuszcza klient nr. %d!\n", clientNumber);
+        break;
+    }
   }
 }
 
