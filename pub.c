@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-// #include <sys/types.h>
 #include <stdbool.h> 
 
 int mugs;
 int client;
 int pubSize;
+int consumingTime;
 pthread_mutex_t beerShield;
 pthread_t *clients;
 
@@ -37,7 +37,7 @@ void* drinkBeers() {
         break;
     }
 
-    usleep((rand()%10) * 1000000);
+    usleep((rand()%consumingTime) * 1000000);
     pthread_mutex_lock(&beerShield);
     mugs++;
     haveMug = false;
@@ -53,6 +53,8 @@ void openPub() {
   printf("Ilu spodziewamy się klientów?: \t");
   scanf("%d", &pubSize);
   clients = malloc(sizeof(pthread_t) * pubSize + 1);
+  printf("Ile zajmie jednemu klientowi wypicie jednego piwa (w sekundach)?: \t");
+  scanf("%d", &consumingTime);
 }
 
 
