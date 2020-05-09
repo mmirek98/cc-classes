@@ -9,7 +9,7 @@ wektory: wektory.o
 	$(LD) $(OPT) wektory.o -o wektory $(LIB)
 
 wektory.o: wektory.c
-	$(CC) -c $(OPT) wektory.c
+	$(CC) -c $(OPT) wektory.c -O3
 
 
 
