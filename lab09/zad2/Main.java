@@ -34,14 +34,6 @@ public class Main {
 
       currentIndex += assignedNumber;
     }
-
-    try {
-      for (int i = 0; i < threadNumber; i++) {
-        threads[i].join();
-      }  
-    } catch (InterruptedException e) {
-      System.out.println(e);
-    }
   }
 }
 
