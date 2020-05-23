@@ -35,6 +35,7 @@ void createMpiDatatype(MPI_Datatype *mpiBookType) {
 
 int main(int argc, char* argv[]) {
   int availableProcesses, processNumber;
+  double start, end;
   const int messagesPerProcessor = 1000;
 
   MPI_Init(&argc, &argv);
@@ -52,14 +53,21 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &processNumber);
 
   if (processNumber == 0) {
+    start = MPI_Wtime();
     Book bookToSend;
     prepareBook(&bookToSend);
-    printf("Proces zerowy (nadawca) rozpoczyna komunikację i wysyła %d wiadomości z książką o tytule: %s \n", (availableProcesses-1)*messagesPerProcessor, bookToSend.title);
+    printf("Proces zerowy (nadawca) rozpoczyna komunikację i wysyła %d wiadomości z książką o tytule: %s \n",
+      (availableProcesses-1)*messagesPerProcessor,
+      bookToSend.title
+    );
     int dstProcessor, messageNumb;
 
     for (dstProcessor = 1; dstProcessor < availableProcesses; dstProcessor++) {
-      for (messageNumb = (dstProcessor-1) * messagesPerProcessor; messageNumb < dstProcessor * messagesPerProcessor; messageNumb++) {
-        MPI_Send(&bookToSend, 1, mpiBookType, dstProcessor, messageNumb, MPI_COMM_WORLD);
+      for (
+        messageNumb = (dstProcessor-1) * messagesPerProcessor;
+        messageNumb < dstProcessor * messagesPerProcessor;
+        messageNumb++) {
+          MPI_Send(&bookToSend, 1, mpiBookType, dstProcessor, messageNumb, MPI_COMM_WORLD);
       }
     }
   } else {
@@ -67,10 +75,26 @@ int main(int argc, char* argv[]) {
     Book receivedBook;
     int messageNumb;
 
-    for (messageNumb = (processNumber-1) * messagesPerProcessor; messageNumb < processNumber * messagesPerProcessor; messageNumb++) {
-      MPI_Recv(&receivedBook, 1, mpiBookType, 0, messageNumb, MPI_COMM_WORLD, &status);
-      printf("Proces %d: otrzymał książke '%s' autorstwa %s o liczbie stron %d kosztującej %.2f --> ID wiadomości: %d \n", processNumber, receivedBook.title, receivedBook.author, receivedBook.pages, receivedBook.price, messageNumb);
+    for (
+      messageNumb = (processNumber-1) * messagesPerProcessor;
+      messageNumb < processNumber * messagesPerProcessor;
+      messageNumb++) {
+        MPI_Recv(&receivedBook, 1, mpiBookType, 0, messageNumb, MPI_COMM_WORLD, &status);
+        // printf("Proces %d: otrzymał książke '%s' autorstwa %s o liczbie stron %d kosztującej %.2f --> ID wiadomości: %d \n",
+        //   processNumber,
+        //   receivedBook.title,
+        //   receivedBook.author,
+        //   receivedBook.pages,
+        //   receivedBook.price,
+        //   messageNumb
+        // );
     }
+  }
+
+  
+  if (processNumber == 0) {
+    end = MPI_Wtime();
+    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
   }
 
   MPI_Type_free(&mpiBookType);
