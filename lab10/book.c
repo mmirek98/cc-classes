@@ -119,7 +119,7 @@ void RUN_DEFAULT() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === Struktura MPI === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
     exit(-1);
   }
 
@@ -183,7 +183,7 @@ void RUN_DEFAULT_SYNCHRO() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === Struktura MPI Synchronicznie === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
     exit(-1);
   }
 
@@ -250,7 +250,7 @@ void RUN_DEFAULT_BUFF() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === Struktura MPI tryb Buforowany === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
     exit(-1);
   }
 
@@ -401,7 +401,7 @@ void RUN_PACKED() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === PACKED === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
   }
 }
 
@@ -549,7 +549,7 @@ void RUN_PACKED_SYNCHRO() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === PACKED - Synchronicznie === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
   }
 }
 
@@ -699,6 +699,6 @@ void RUN_PACKED_BUFF() {
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
     end = MPI_Wtime();
-    printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
+    printf("  === PACKED - tryb Buforowany === Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
   }
 }
