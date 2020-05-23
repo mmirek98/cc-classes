@@ -13,6 +13,32 @@ typedef struct Book_s {
 
 const int messagesPerProcessor = 1000;
 
+void prepareBook(Book *book);
+void createMpiDatatypeDefault(MPI_Datatype *mpiBookType);
+void RUN_DEFAULT();
+void RUN_DEFAULT_SYNCHRO();
+void RUN_DEFAULT_BUFF();
+void RUN_PACKED();
+void RUN_PACKED_SYNCHRO();
+void RUN_PACKED_BUFF();
+
+int main(int argc, char* argv[]) {
+
+  MPI_Init(&argc, &argv);
+
+  RUN_DEFAULT();
+  // RUN_PACKED();
+
+  // RUN_DEFAULT_SYNCHRO();
+  // RUN_PACKED_SYNCHRO();
+  
+  // RUN_DEFAULT_BUFF();
+  // RUN_PACKED_BUFF();
+
+  MPI_Finalize();
+
+  return 0;
+}
 
 void prepareBook(Book *book) {
   strncpy(book->title, "Mroczna Wieża", 255);
@@ -675,22 +701,4 @@ void RUN_PACKED_BUFF() {
     end = MPI_Wtime();
     printf("Czas operacji dla %d wiadomości: %lf\n", (availableProcesses-1)*messagesPerProcessor, end-start);
   }
-}
-
-int main(int argc, char* argv[]) {
-
-  MPI_Init(&argc, &argv);
-
-  RUN_DEFAULT();
-  // RUN_PACKED();
-
-  // RUN_DEFAULT_SYNCHRO();
-  // RUN_PACKED_SYNCHRO();
-  
-  // RUN_DEFAULT_BUFF();
-  // RUN_PACKED_BUFF();
-
-  MPI_Finalize();
-
-  return 0;
 }
