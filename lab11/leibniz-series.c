@@ -32,13 +32,16 @@ int main(int argc, char* argv[]) {
     localResult += pow(-1, i) / (2*i + 1);
   }
 
-  printf("Dla procesora: %d suma wynosi: %lf; chunk=%d\n", processNumber, localResult, chunk);
-
   MPI_Reduce(&localResult, &globalResult, 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 
   MPI_Barrier(MPI_COMM_WORLD);
   if (processNumber == 0) {
-    printf("Wynik wynosi: %.15lf, wynik z bilioteki math: %.15lf\n", globalResult, M_PI_4);
+    printf(
+      "Wynik dla %d składnikoów wynosi = %.15lf, wynik z bilioteki math: %.15lf\nRóżnica: %.15lf\n",
+      range,
+      globalResult,
+      M_PI_4,
+      fabs(globalResult - M_PI_4));
   }
 
   MPI_Finalize();
