@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
   }
 
   // compute pixels depending on process rank
+  start = MPI_Wtime();
   if (myrank == 0)
   {
     computeFirstPart(result, pixelsToCompute, receivedDown, pixelChunks[myrank], width);
@@ -120,11 +121,12 @@ int main(int argc, char *argv[])
   {
     compute(result, pixelsToCompute, receivedUp, receivedDown, pixelChunks[myrank], width);
   }
+  end = MPI_Wtime();
 
   MPI_Gatherv(result, pixelChunks[myrank], MPI_UNSIGNED_CHAR, out.pixel, pixelChunks, offsets, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
   MPI_Finalize();
-  
+
   if (myrank == 0)
   {
     writeData(argv[2], &out);
