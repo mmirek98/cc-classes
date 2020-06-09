@@ -1,10 +1,13 @@
 #include <mpi.h>
 #include "pbm.h"
+#include <time.h>
 
 void computeFirstPart(uchar*, uchar*, uchar*, int, int);
 void compute(uchar*, uchar*, uchar*, uchar*, int, int);
 void computeLastPart(uchar*, uchar*, uchar*, int, int);
 uchar validatePixel(int pixel);
+
+void computeSync(image *in, image *out);
 
 const int filterMask[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 const int maskSum = 9;
@@ -84,13 +87,13 @@ int main(int argc, char *argv[])
     memcpy(lastRow, &pixelsToCompute[lastRowStartIndex], width);
 
     MPI_Send(&lastRow[0], width, MPI_UNSIGNED_CHAR, myrank + 1, myrank + 1, MPI_COMM_WORLD);
-    printf("Proces %d wysyla swoj OSTATNI rzad do procesora %d\n", myrank, myrank + 1);
+    // printf("Proces %d wysyla swoj OSTATNI rzad do procesora %d\n", myrank, myrank + 1);
   }
 
   if (myrank != 0)
   {
     MPI_Recv(&receivedUp[0], width, MPI_UNSIGNED_CHAR, myrank - 1, myrank, MPI_COMM_WORLD, &status);
-    printf("Proces %d otrzymuje rzad WYZEJ od procesora %d\n", myrank, myrank - 1);
+    // printf("Proces %d otrzymuje rzad WYZEJ od procesora %d\n", myrank, myrank - 1);
   }
 
   if (myrank != 0)
@@ -98,13 +101,13 @@ int main(int argc, char *argv[])
     memcpy(firstRow, pixelsToCompute, width);
 
     MPI_Send(firstRow, width, MPI_UNSIGNED_CHAR, myrank - 1, myrank - 1, MPI_COMM_WORLD);
-    printf("Proces %d wysyla swoj PIERWSZY rzad do procesora %d\n", myrank, myrank - 1);
+    // printf("Proces %d wysyla swoj PIERWSZY rzad do procesora %d\n", myrank, myrank - 1);
   }
 
   if (myrank != npes - 1)
   {
     MPI_Recv(&receivedDown[0], width, MPI_UNSIGNED_CHAR, myrank + 1, myrank, MPI_COMM_WORLD, &status);
-    printf("Proces %d otrzymuje rzad nizej od procesora %d\n", myrank, myrank + 1);
+    // printf("Proces %d otrzymuje rzad nizej od proceZZZsora %d\n", myrank, myrank + 1);
   }
 
   // compute pixels depending on process rank
@@ -124,6 +127,13 @@ int main(int argc, char *argv[])
   end = MPI_Wtime();
 
   MPI_Gatherv(result, pixelChunks[myrank], MPI_UNSIGNED_CHAR, out.pixel, pixelChunks, offsets, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+  // Test synchronous
+  // if (myrank == 0) {
+  //   start = MPI_Wtime();
+  //   computeSync(&in, &out);
+  //   end = MPI_Wtime();
+  // }
 
   MPI_Finalize();
 
@@ -322,5 +332,43 @@ void computeLastPart(
     }
 
     result[i] = validatePixel(pixel);
+  }
+}
+
+void computeSync(image *in, image *out) {
+  int i;
+  for (i = 0; i < in->height * in->width; i++) {
+    int pixel;
+
+    if (i <= in->width)
+    {
+      pixel = in->pixel[i];
+    }
+    else if (i >= in->height * (in->width - 1))
+    {
+      pixel = in->pixel[i];
+    }
+    else if (i % in->width == 0 || i % (in->width - 1) == 0)
+    {
+      pixel = in->pixel[i];
+    }
+    else
+    {
+      int sum = 0;
+      sum = filterMask[0] * in->pixel[i - in->width - 1] +
+            filterMask[1] * in->pixel[i - in->width] +
+            filterMask[2] * in->pixel[i - in->width + 1] +
+            filterMask[3] * in->pixel[i - 1] +
+            filterMask[4] * in->pixel[i] +
+            filterMask[5] * in->pixel[i + 1] +
+            filterMask[6] * in->pixel[i + in->width - 1] +
+            filterMask[7] * in->pixel[i + in->width] +
+            filterMask[8] * in->pixel[i + in->width + 1];
+      pixel = (sum / maskSum);
+
+      pixel = (sum / maskSum);
+    }
+
+    out->pixel[i] = validatePixel(pixel);
   }
 }
